@@ -18,23 +18,39 @@ class CheckENV:
 #            print("Error! " + self.name + " DO NOT EXISTS, pleae check!")
 #            sys.exit()
 
+    def EchoUsage(self):
+        a = """
+        Usage: search_v3_downgrade.py [app|pc|staging_pc] [lf|mjq|staging] [blender|smerger|searcher|dmerger|clustermap] parameter
+        Example: search_v3_downgrade.py app lf blender paramater
+            """ 
+        print a
+
     def CheckFile(self,a):
         if os.path.exists(a):
             print("processing " + a + " ...")
         else:
             print("Error! " + a + " DO NOT EXISTS, pleae check!")
+            self.EchoUsage()
             sys.exit()
 
-    def CheckDevice(self,a):
-        print "Checking", a
-
-
-    def CheckLocation(self,a):
-        print "Checking", a
-
-
-    def CheckComponent(self,a):
-        print "Checking", a
+#    def CheckDevice(self,a):
+#        print "Checking", a
+#        if (a != "app" and a != "pc" and a != "mobile"):
+#            print("Error! Device " + a + " DO NOT EXISTS, pleae check!")
+#            self.EchoUsage()
+#            sys.exit()
+#    def CheckLocation(self,a):
+#        print "Checking", a
+#        if (a != "lf" and a != "LF" and a != "mjq" and a != "MJQ" and a != "staging"):
+#            print("Error! Location " + a + " DO NOT EXISTS, pleae check!")
+#            self.EchoUsage()
+#            sys.exit()
+#    def CheckComponent(self,a):
+#        print "Checking", a
+#        if (a != "blender" and a != "smerger" and a != "searcher" and a != "dmerger" and a != "clustermap"):
+#            print("Error! Component " + a + " DO NOT EXISTS, pleae check!")
+#            self.EchoUsage()
+#            sys.exit()
 
 class DownGrade:
 
@@ -44,16 +60,18 @@ class DownGrade:
         self.component = component
         self.action = action
 
-    def CheckPara(self):
-        a = CheckENV()
-        a.CheckDevice(self.device)
-        a.CheckLocation(self.location)
-        a.CheckComponent(self.component)
+#    def CheckPara(self):
+#        a = CheckENV()
+#        a.CheckDevice(self.device)
+#        a.CheckLocation(self.location)
+#        a.CheckComponent(self.component)
 
     def GetFile(self):
         scriptPath = os.getcwd()
         file = (scriptPath + "/" + self.device + "/" + self.location + "/nodes.xml")
         newfile = CheckENV()
+
+#       no need to check device(app|pc) and location(lf|mjq), because if it's  error, this file will not exists.
         newfile.CheckFile(file)
         return file
 
@@ -110,5 +128,5 @@ class DownGrade:
 if __name__ == '__main__':
     opt = DownGrade(sys.argv[1],sys.argv[2],sys.argv[3],sys.argv[4])
 #    opt.GetIPlist()
-    opt.CheckPara()
+#    opt.CheckPara()
     opt.ProcessCurl()
