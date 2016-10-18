@@ -8,15 +8,33 @@ import xml.etree.ElementTree as ET
 
 class CheckENV:
 
-    def __init__(self,name):
-        self.name = name
+#    def __init__(self,name):
+#        self.name = name
 
-    def CheckFile(self):
-        if os.path.exists(self.name):
-            print("processing " + self.name + " ...")
+#    def CheckFile(self):
+#        if os.path.exists(self.name):
+#            print("processing " + self.name + " ...")
+#        else:
+#            print("Error! " + self.name + " DO NOT EXISTS, pleae check!")
+#            sys.exit()
+
+    def CheckFile(self,a):
+        if os.path.exists(a):
+            print("processing " + a + " ...")
         else:
-            print(self.name + " DO NOT EXISTS, pleae check!")
+            print("Error! " + a + " DO NOT EXISTS, pleae check!")
             sys.exit()
+
+    def CheckDevice(self,a):
+        print "Checking", a
+
+
+    def CheckLocation(self,a):
+        print "Checking", a
+
+
+    def CheckComponent(self,a):
+        print "Checking", a
 
 class DownGrade:
 
@@ -26,11 +44,17 @@ class DownGrade:
         self.component = component
         self.action = action
 
+    def CheckPara(self):
+        a = CheckENV()
+        a.CheckDevice(self.device)
+        a.CheckLocation(self.location)
+        a.CheckComponent(self.component)
+
     def GetFile(self):
-        pyPath = os.getcwd()
-        file = (pyPath + "/" + self.device + "/" + self.location + "/nodes.xml")
-        newfile = CheckENV(file)
-        newfile.CheckFile()
+        scriptPath = os.getcwd()
+        file = (scriptPath + "/" + self.device + "/" + self.location + "/nodes.xml")
+        newfile = CheckENV()
+        newfile.CheckFile(file)
         return file
 
     def GetIPlist(self):
@@ -38,7 +62,8 @@ class DownGrade:
         tree = ET.parse(file)
 
         IPlist = []
-        node = tree.findall(".//*[@type='blender']/node")
+#usage: node = tree.findall(".//*[@type='blender']/node")
+        node = tree.findall(".//*[@type=\'%s\']/node" % self.component)
         for IPall in node:
             IPdict = IPall.attrib    #get a dict format
             IPlist.append(IPdict["ip"])
@@ -58,24 +83,32 @@ class DownGrade:
 
     def ProcessCurl(self):
         iplist = self.GetIPlist()
-        print iplist
+#        print iplist
+        for ip in iplist:
+            if (self.component == "blender"):
+                print "blender component"
+                url = 'http://%s:10080/Degradex' % ip
+                print url
 
-        if (self.action == "blender"):
-            url = http://10.191.5
+            elif (self.component == "smerger"):
+                print ip,"smerger","13820"
 
-        elif (self.action == "merger"):
-            print "merger"
+            elif (self.component == "searcher"):
+                print ip,"searcher","10103"
 
-        elif (self.action == "searcher"):
-            print "searcher"
+            elif (self.component == "dmerger"):
+                print ip,"dmerger"
 
-        elif (self.action == "list"):
-            print "list"
+            elif (self.component == "list"):
+                print "list"
 
-        else:
-            print "action wrong"
+            else:
+                print "component wrong"
+
+        print self.action,type(self.action)
 
 if __name__ == '__main__':
     opt = DownGrade(sys.argv[1],sys.argv[2],sys.argv[3],sys.argv[4])
 #    opt.GetIPlist()
+    opt.CheckPara()
     opt.ProcessCurl()
