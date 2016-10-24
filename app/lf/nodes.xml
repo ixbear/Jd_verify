@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<clustermap version="1" >
+	<clusters>
+		<cluster name="b1" type="blender">
+			<node ip="10.191.76.250" port="12000" />
+			<node ip="10.191.53.87" port="12000" />
+		</cluster>
+		<cluster name="m1" type="smerger">
+			<node ip="10.191.76.250" port="13819" />
+			<node ip="10.191.53.88" port="13819" />
+		</cluster>
+		<cluster name="s1" type="searcher">
+			<node ip="172.16.141.152" port="10101" />
+		</cluster>
+		<cluster name="s2" type="searcher">
+			<node ip="172.16.141.153" port="10101" />
+		</cluster>
+		<cluster name="s3" type="searcher">
+			<node ip="172.16.141.154" port="10101" />
+		</cluster>
+		<cluster name="d1" type="dmerger">
+		        <node ip="10.187.209.116" port="15000" />
+		</cluster>  
+		<cluster name="op" type="operator">
+		        <node ip="10.190.31.107" port="6000" />
+		        <node ip="10.191.54.110" port="6000" />
+		</cluster>  
+
+	</clusters>
+	<relations>
+		<relation name="b1">
+			<child name="m1" />
+		</relation>
+		<relation name="m1">
+			<child name="s1" />
+			<child name="s2" />
+			<child name="s3" />
+			<child name="d1" />
+		</relation>
+	</relations>   
+</clustermap>

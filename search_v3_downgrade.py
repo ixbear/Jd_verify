@@ -4,7 +4,7 @@ import sys
 import os
 import urllib2
 import xml.etree.ElementTree as ET
-
+import xml.dom.minidom
 
 class CheckENV:
 
@@ -20,8 +20,8 @@ class CheckENV:
 
     def EchoUsage(self):
         a = """
-        Usage: search_v3_downgrade.py [app|pc|staging_pc] [lf|mjq|staging] [blender|smerger|searcher|dmerger|clustermap] parameter
-        Example: search_v3_downgrade.py app lf blender paramater
+        Usage: ./search_v3_downgrade.py [app|pc|staging_pc] [lf|mjq|staging] [blender|smerger|searcher|dmerger|clustermap] action
+        Example: ./search_v3_downgrade.py app lf blender action
             """ 
         print a
 
@@ -60,12 +60,6 @@ class DownGrade:
         self.component = component
         self.action = action
 
-#    def CheckPara(self):
-#        a = CheckENV()
-#        a.CheckDevice(self.device)
-#        a.CheckLocation(self.location)
-#        a.CheckComponent(self.component)
-
     def GetFile(self):
         scriptPath = os.getcwd()
         file = (scriptPath + "/" + self.device + "/" + self.location + "/nodes.xml")
@@ -80,24 +74,47 @@ class DownGrade:
         tree = ET.parse(file)
 
         IPlist = []
-#usage: node = tree.findall(".//*[@type='blender']/node")
-        node = tree.findall(".//*[@type=\'%s\']/node" % self.component)
-        for IPall in node:
-            IPdict = IPall.attrib    #get a dict format
-            IPlist.append(IPdict["ip"])
-#        print IPlist
+
+#For Python2.7:
+##usage:node = tree.findall(".//*[@type='blender']/node")
+#       node = tree.findall(".//*[@type=\'%s\']/node" % self.component)
+#        print "node is ", node
+#        for IPall in node:
+#            IPdict = IPall.attrib    #get a dict format
+#            IPlist.append(IPdict["ip"])
+
+
+#or For Python2.7:
+#        for elem in tree.iterfind('clusters/cluster[@type="smerger"]/node'):
+#                a = elem.attrib.get('ip')    #get a ip, str type
+#                IPlist.append(a)
+
+#For Python2.6
+        dom = xml.dom.minidom.parse(file)
+        root = dom.documentElement
+        nodelist = root.getElementsByTagName('cluster') #get a nodelist object
+        for i in nodelist:
+            if ( self.component == i.getAttribute('type')):
+                thelist = i.getElementsByTagName('node')
+                for k in thelist:
+                    IPlist.append(k.getAttribute('ip'))
         return IPlist
 
-    def HTTPreq(url):
+    def HTTPreq(self,url):
+        print("Requsting: " + url)
         try:
             s = urllib2.urlopen(url).read()
+#            print s
         except urllib2.HTTPError,e:
-            print e.code
-            sys.exit()
-        except urllib2.URLErrror,e:
-            print str(e)
-            sys.exit()
-        return s
+#            print e.code
+            s = ("HTTPError! " + e.code)
+#            sys.exit()
+        except urllib2.URLError,e:
+#            print str(e)
+            s = ("URLError! " + str(e))
+#            sys.exit()
+        print s
+#        return s
 
     def ProcessCurl(self):
         iplist = self.GetIPlist()
@@ -106,27 +123,33 @@ class DownGrade:
             if (self.component == "blender"):
                 print "blender component"
                 url = 'http://%s:10080/Degradex' % ip
-                print url
+                self.HTTPreq(url)
 
             elif (self.component == "smerger"):
-                print ip,"smerger","13820"
+                url = 'http://%s:13820/%s' % (ip, self.action)
+                self.HTTPreq(url)
 
             elif (self.component == "searcher"):
-                print ip,"searcher","10103"
+                url = 'http://%s:10080/Searcher' % ip
+                self.HTTPreq(url)
 
             elif (self.component == "dmerger"):
-                print ip,"dmerger"
+                url = 'http://%s:10080/dmerger' % ip
+                self.HTTPreq(url)
 
             elif (self.component == "list"):
-                print "list"
+                url = 'http://%s:10080/list' % ip
+                self.HTTPreq(url)
 
             else:
                 print "component wrong"
 
-        print self.action,type(self.action)
-
 if __name__ == '__main__':
-    opt = DownGrade(sys.argv[1],sys.argv[2],sys.argv[3],sys.argv[4])
-#    opt.GetIPlist()
-#    opt.CheckPara()
-    opt.ProcessCurl()
+    if (len(sys.argv) != 5):
+        print "Error! bad parameter!"
+        a = CheckENV()
+        a.EchoUsage()
+    else:
+        opt = DownGrade(sys.argv[1],sys.argv[2],sys.argv[3],sys.argv[4])
+#        opt.CheckPara()
+        opt.ProcessCurl()
